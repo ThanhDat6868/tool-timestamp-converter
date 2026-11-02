@@ -1,0 +1,405 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Timestamp Converter - Công cụ chuyển đổi Timestamp</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-100 min-h-screen text-slate-800">
+
+  <header class="bg-white border-b">
+    <div class="max-w-5xl mx-auto px-5 py-5">
+      <h1 class="text-2xl font-bold text-blue-700">
+        Timestamp Converter
+      </h1>
+      <p class="text-gray-500 mt-1">
+        Công cụ chuyển đổi Unix Timestamp sang ngày giờ và ngược lại
+      </p>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-5 py-10 space-y-6">
+
+    <!-- Thời gian hiện tại -->
+    <section class="bg-white rounded-xl shadow-sm p-6">
+      <h2 class="font-bold text-lg mb-3">Unix Timestamp hiện tại</h2>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="bg-blue-50 rounded-lg p-4">
+          <p class="text-sm text-gray-500">Timestamp (giây)</p>
+          <p id="currentSeconds"
+            class="text-xl font-bold text-blue-700 mt-2 break-all">--</p>
+        </div>
+
+        <div class="bg-blue-50 rounded-lg p-4">
+          <p class="text-sm text-gray-500">Timestamp (mili giây)</p>
+          <p id="currentMilliseconds"
+            class="text-xl font-bold text-blue-700 mt-2 break-all">--</p>
+        </div>
+      </div>
+
+      <button onclick="useCurrentTime()"
+        class="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg">
+        <span>↻</span> Lấy thời gian hiện tại
+      </button>
+    </section>
+
+    <!-- Timestamp sang ngày giờ -->
+    <section class="bg-white rounded-xl shadow-sm p-6">
+      <h2 class="text-xl font-bold mb-2">
+        Timestamp → Ngày giờ
+      </h2>
+
+      <p class="text-sm text-gray-500 mb-5">
+        Nhập Unix Timestamp để chuyển đổi thành ngày giờ dễ đọc.
+      </p>
+
+      <label class="block text-sm font-medium mb-2">
+        Nhập Timestamp
+      </label>
+
+      <input
+        id="timestampInput"
+        type="text"
+        placeholder="Ví dụ: 1700000000"
+        class="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+      >
+
+      <div class="mt-4">
+        <label class="block text-sm font-medium mb-2">
+          Đơn vị Timestamp
+        </label>
+
+        <select id="timestampUnit"
+          class="w-full border rounded-lg px-4 py-3 bg-white outline-none focus:ring-2 focus:ring-blue-500">
+          <option value="auto">Tự động nhận diện</option>
+          <option value="seconds">Seconds (Giây)</option>
+          <option value="milliseconds">Milliseconds (Mili giây)</option>
+        </select>
+      </div>
+
+      <button onclick="convertTimestamp()"
+        class="mt-5 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg">
+        Chuyển đổi Timestamp
+      </button>
+
+      <p id="timestampMessage" class="text-sm mt-3"></p>
+
+      <div id="timestampResult" class="hidden mt-5 space-y-3">
+
+        <div class="bg-slate-50 rounded-lg p-4">
+          <p class="text-sm text-gray-500">Ngày giờ địa phương</p>
+          <p id="localResult" class="font-bold mt-2"></p>
+        </div>
+
+        <div class="bg-slate-50 rounded-lg p-4">
+          <p class="text-sm text-gray-500">Thời gian UTC</p>
+          <p id="utcResult" class="font-bold mt-2"></p>
+        </div>
+
+        <div class="bg-slate-50 rounded-lg p-4">
+          <p class="text-sm text-gray-500">ISO 8601</p>
+          <p id="isoResult" class="font-bold mt-2 break-all"></p>
+          <button onclick="copyText('isoResult')"
+            class="text-blue-600 text-sm mt-2 hover:underline">
+            Sao chép
+          </button>
+        </div>
+
+        <div class="bg-slate-50 rounded-lg p-4">
+          <p class="text-sm text-gray-500">Timestamp (giây)</p>
+          <p id="secondsResult" class="font-bold mt-2 break-all"></p>
+          <button onclick="copyText('secondsResult')"
+            class="text-blue-600 text-sm mt-2 hover:underline">
+            Sao chép
+          </button>
+        </div>
+
+        <div class="bg-slate-50 rounded-lg p-4">
+          <p class="text-sm text-gray-500">Timestamp (mili giây)</p>
+          <p id="millisecondsResult" class="font-bold mt-2 break-all"></p>
+          <button onclick="copyText('millisecondsResult')"
+            class="text-blue-600 text-sm mt-2 hover:underline">
+            Sao chép
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Ngày giờ sang Timestamp -->
+    <section class="bg-white rounded-xl shadow-sm p-6">
+      <h2 class="text-xl font-bold mb-2">
+        Ngày giờ → Timestamp
+      </h2>
+
+      <p class="text-sm text-gray-500 mb-5">
+        Chọn ngày giờ để chuyển đổi sang Unix Timestamp.
+        Thời gian được hiểu theo múi giờ của thiết bị.
+      </p>
+
+      <label class="block text-sm font-medium mb-2">
+        Chọn ngày và giờ
+      </label>
+
+      <input
+        id="dateInput"
+        type="datetime-local"
+        step="0.001"
+        class="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+      >
+
+      <button onclick="convertDate()"
+        class="mt-5 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg">
+        Chuyển đổi sang Timestamp
+      </button>
+
+      <p id="dateMessage" class="text-sm mt-3"></p>
+
+      <div id="dateResult" class="hidden mt-5 space-y-3">
+
+        <div class="bg-slate-50 rounded-lg p-4">
+          <p class="text-sm text-gray-500">Unix Timestamp (giây)</p>
+          <p id="dateSeconds" class="font-bold mt-2 break-all"></p>
+          <button onclick="copyText('dateSeconds')"
+            class="text-blue-600 text-sm mt-2 hover:underline">
+            Sao chép
+          </button>
+        </div>
+
+        <div class="bg-slate-50 rounded-lg p-4">
+          <p class="text-sm text-gray-500">Unix Timestamp (mili giây)</p>
+          <p id="dateMilliseconds" class="font-bold mt-2 break-all"></p>
+          <button onclick="copyText('dateMilliseconds')"
+            class="text-blue-600 text-sm mt-2 hover:underline">
+            Sao chép
+          </button>
+        </div>
+
+        <div class="bg-slate-50 rounded-lg p-4">
+          <p class="text-sm text-gray-500">Thời gian UTC</p>
+          <p id="dateUTC" class="font-bold mt-2"></p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Giải thích -->
+    <section class="bg-white rounded-xl shadow-sm p-6">
+      <h2 class="font-bold text-lg mb-3">
+        Timestamp là gì?
+      </h2>
+
+      <p class="text-gray-600 text-sm leading-7">
+        Unix Timestamp là cách biểu diễn thời gian bằng một con số,
+        tính từ 00:00:00 ngày 01/01/1970 theo giờ UTC.
+        Timestamp thường được sử dụng trong lập trình, cơ sở dữ liệu
+        và các hệ thống máy tính.
+      </p>
+
+      <div class="mt-4 space-y-2 text-sm">
+        <p><strong>Seconds:</strong> Đơn vị giây, thường có 10 chữ số.</p>
+        <p><strong>Milliseconds:</strong> Đơn vị mili giây, thường có 13 chữ số.</p>
+        <p><strong>UTC:</strong> Múi giờ chuẩn quốc tế.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="text-center text-gray-500 text-sm py-8">
+    Timestamp Converter - Công cụ chuyển đổi thời gian
+  </footer>
+
+  <script>
+
+    // Cập nhật Timestamp hiện tại
+    function updateCurrentTime() {
+      const now = Date.now();
+
+      document.getElementById("currentSeconds").textContent =
+        Math.floor(now / 1000);
+
+      document.getElementById("currentMilliseconds").textContent =
+        now;
+    }
+
+    // Lấy thời gian hiện tại đưa vào ô nhập
+    function useCurrentTime() {
+      const now = new Date();
+
+      document.getElementById("timestampInput").value =
+        Math.floor(now.getTime() / 1000);
+
+      document.getElementById("timestampUnit").value = "seconds";
+
+      document.getElementById("dateInput").value =
+        formatDateInput(now);
+
+      convertTimestamp();
+      convertDate();
+    }
+
+    // Định dạng ngày giờ cho datetime-local
+    function formatDateInput(date) {
+      const pad = number => String(number).padStart(2, "0");
+
+      return date.getFullYear() + "-" +
+        pad(date.getMonth() + 1) + "-" +
+        pad(date.getDate()) + "T" +
+        pad(date.getHours()) + ":" +
+        pad(date.getMinutes()) + ":" +
+        pad(date.getSeconds()) + "." +
+        String(date.getMilliseconds()).padStart(3, "0");
+    }
+
+    // Timestamp sang ngày giờ
+    function convertTimestamp() {
+      const input = document.getElementById("timestampInput").value.trim();
+      const unit = document.getElementById("timestampUnit").value;
+
+      const message = document.getElementById("timestampMessage");
+      const result = document.getElementById("timestampResult");
+
+      result.classList.add("hidden");
+
+      if (!input) {
+        message.textContent = "Vui lòng nhập Timestamp.";
+        message.className = "text-sm mt-3 text-red-600";
+        return;
+      }
+
+      if (!/^-?\d+(\.\d+)?$/.test(input)) {
+        message.textContent = "Timestamp phải là một con số hợp lệ.";
+        message.className = "text-sm mt-3 text-red-600";
+        return;
+      }
+
+      let value = Number(input);
+
+      if (!Number.isFinite(value)) {
+        message.textContent = "Giá trị Timestamp không hợp lệ.";
+        message.className = "text-sm mt-3 text-red-600";
+        return;
+      }
+
+      let milliseconds;
+
+      if (unit === "seconds") {
+        milliseconds = value * 1000;
+      } else if (unit === "milliseconds") {
+        milliseconds = value;
+      } else {
+        milliseconds = Math.abs(value) >= 100000000000
+          ? value
+          : value * 1000;
+      }
+
+      if (!Number.isSafeInteger(Math.round(milliseconds)) ||
+          Math.abs(milliseconds) > 8640000000000000) {
+        message.textContent = "Timestamp nằm ngoài phạm vi hỗ trợ.";
+        message.className = "text-sm mt-3 text-red-600";
+        return;
+      }
+
+      const date = new Date(milliseconds);
+
+      if (isNaN(date.getTime())) {
+        message.textContent = "Không thể chuyển đổi Timestamp này.";
+        message.className = "text-sm mt-3 text-red-600";
+        return;
+      }
+
+      document.getElementById("localResult").textContent =
+        date.toLocaleString("vi-VN");
+
+      document.getElementById("utcResult").textContent =
+        date.toUTCString();
+
+      document.getElementById("isoResult").textContent =
+        date.toISOString();
+
+      document.getElementById("secondsResult").textContent =
+        milliseconds / 1000;
+
+      document.getElementById("millisecondsResult").textContent =
+        milliseconds;
+
+      result.classList.remove("hidden");
+
+      message.textContent = "Chuyển đổi thành công!";
+      message.className = "text-sm mt-3 text-green-600";
+    }
+
+    // Ngày giờ sang Timestamp
+    function convertDate() {
+      const input = document.getElementById("dateInput").value;
+
+      const message = document.getElementById("dateMessage");
+      const result = document.getElementById("dateResult");
+
+      result.classList.add("hidden");
+
+      if (!input) {
+        message.textContent = "Vui lòng chọn ngày và giờ.";
+        message.className = "text-sm mt-3 text-red-600";
+        return;
+      }
+
+      const date = new Date(input);
+
+      if (isNaN(date.getTime())) {
+        message.textContent = "Ngày giờ không hợp lệ.";
+        message.className = "text-sm mt-3 text-red-600";
+        return;
+      }
+
+      const milliseconds = date.getTime();
+      const seconds = milliseconds / 1000;
+
+      document.getElementById("dateSeconds").textContent = seconds;
+
+      document.getElementById("dateMilliseconds").textContent =
+        milliseconds;
+
+      document.getElementById("dateUTC").textContent =
+        date.toUTCString();
+
+      result.classList.remove("hidden");
+
+      message.textContent = "Chuyển đổi thành công!";
+      message.className = "text-sm mt-3 text-green-600";
+    }
+
+    // Sao chép nội dung
+    async function copyText(elementId) {
+      const text = document.getElementById(elementId).textContent;
+
+      try {
+        await navigator.clipboard.writeText(text);
+        alert("Đã sao chép thành công!");
+      } catch (error) {
+        alert("Không thể sao chép nội dung.");
+      }
+    }
+
+    // Nhấn Enter để chuyển đổi
+    document.getElementById("timestampInput").addEventListener(
+      "keydown",
+      function(event) {
+        if (event.key === "Enter") {
+          convertTimestamp();
+        }
+      }
+    );
+
+    // Cập nhật đồng hồ mỗi giây
+    updateCurrentTime();
+    setInterval(updateCurrentTime, 1000);
+
+  </script>
+
+</body>
+</html>
